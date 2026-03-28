@@ -8,7 +8,8 @@ const untrack = _untrack as any;
 
 // --- State Management ---
 // State to handle page routing 
-const currentRoute = state('home'); 
+const currentRoute = state('home');
+const isMobileMenuOpen = state(false);
 // State to handle interactive slider values
 const esgScore = state(75);
 
@@ -35,6 +36,7 @@ const Icons = {
   Data: () => `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>`,
   Simulator: () => `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="2" y1="14" x2="6" y2="14"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="18" y1="16" x2="22" y2="16"/></svg>`,
   Mechanisms: () => `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>`,
+  References: () => `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
   Logo: () => `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`
 };
 
@@ -168,7 +170,7 @@ const ConceptsPage = component(() => {
   return h('div', { class: 'flex flex-col gap-6' },
     h('h2', {}, 'Key Concepts'),
     h('p', {}, 'Environmental, Social, and Governance (ESG) metrics serve as the primary proxy for measuring a company\'s contribution to the United Nations SDGs.'),
-    h('div', { style: 'display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1rem;' },
+    h('div', { class: 'concepts-grid' },
       ...concepts.map((c, i) => {
         return h('div', { 
             class: 'card',
@@ -358,9 +360,7 @@ const MechanismsComponent = component(() => {
   return h('div', { class: 'flex flex-col gap-6' },
     h('h2', {}, 'Mechanisms of Impact'),
     h('p', {}, 'Explore the core drivers of sustainable value creation. Click a tile to see more details.'),
-    h('div', { 
-        style: 'display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;' 
-      },
+    h('div', { class: 'mechanisms-grid' },
       ...steps.map((s, i) => {
         return h('div', { 
             style: () => `
@@ -746,19 +746,115 @@ const SimulatorPage = component(() => {
   );
 });
 
+const ReferencesPage = component(() => {
+  const isLoaded = state(false);
+  effect(() => {
+    setTimeout(() => { isLoaded.value = true; }, 50);
+  });
+
+  const refs = [
+    {
+      index: 1,
+      authors: 'Sharma, R., C. S., D. V., K. M., & R. A.',
+      year: '2025',
+      title: 'SDG adoption and firm risk: The impact of ESG performance, investor confidence, and agency cost.',
+      source: 'Review of Economics (ideas.repec.org)',
+      url: 'https://ideas.repec.org/a/eee/reveco/v101y2025ics1059056025003685.html',
+      tag: 'ESG & Firm Risk'
+    },
+    {
+      index: 2,
+      authors: 'Team, W.',
+      year: '2025, April 23',
+      title: 'Risk Reduction. What Is It, Examples, Methods, Benefits.',
+      source: 'Wall Street Mojo',
+      url: 'https://www.wallstreetmojo.com/risk-reduction/',
+      tag: 'Risk Reduction'
+    },
+    {
+      index: 3,
+      authors: 'ECGI Working Paper Series in Law',
+      year: '2022',
+      title: 'Institutional Investors and ESG Preferences.',
+      source: 'European Corporate Governance Institute (ECGI)',
+      url: 'https://www.ecgi.global/sites/default/files/working_papers/documents/esgfinal_1.pdf',
+      tag: 'Investor Preferences'
+    },
+    {
+      index: 4,
+      authors: 'Santillán-Salgado, L. J. E., D. V., & R. J.',
+      year: '2025',
+      title: 'The Effects of ESG Scores and ESG Momentum on Stock Returns and Volatility: Evidence from U.S. Markets.',
+      source: 'Journal of Risk and Financial Management (MDPI)',
+      url: 'https://ideas.repec.org/a/gam/jjrfmx/v18y2025i7p367-d1692779.html',
+      tag: 'ESG & Returns'
+    }
+  ];
+
+  return h('div', { class: 'flex flex-col gap-6' },
+    h('div', {},
+      h('h2', {}, 'References'),
+      h('p', { style: 'font-size: 1.05rem; line-height: 1.7;' }, 'Academic and professional sources underpinning the GreenAlpha research framework. All citations follow APA 7th edition formatting.')
+    ),
+    h('div', { class: 'flex flex-col gap-4' },
+      ...refs.map((r, i) =>
+        h('div', {
+          class: 'card',
+          style: () => `
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            border-left: 3px solid var(--emerald);
+            padding-left: 1.75rem;
+            transition: opacity 0.5s ease ${i * 0.1}s, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${i * 0.1}s;
+            opacity: ${isLoaded.value ? 1 : 0};
+            transform: ${isLoaded.value ? 'translateY(0)' : 'translateY(20px)'};
+            margin-bottom: 0;
+          `
+        },
+          // Header row: number + tag
+          h('div', { style: 'display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;' },
+            h('span', { style: 'font-family: ui-monospace, monospace; font-size: 0.85rem; color: var(--emerald); font-weight: 700; min-width: 1.5rem;' }, `[${r.index}]`),
+            h('span', { style: 'font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--bg-dark); background: var(--emerald); border-radius: 4px; padding: 0.2rem 0.6rem;' }, r.tag)
+          ),
+          // Author + year
+          h('p', { style: 'margin: 0; font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;' },
+            h('span', { style: 'color: var(--text-primary); font-weight: 600;' }, r.authors),
+            ` (${r.year}). `
+          ),
+          // Title
+          h('p', { style: 'margin: 0; font-size: 1rem; color: #fff; font-style: italic; line-height: 1.6;' }, r.title),
+          // Source + link
+          h('div', { style: 'display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;' },
+            h('span', { style: 'font-size: 0.9rem; color: var(--text-secondary);' }, r.source + '.'),
+            h('a', {
+              href: r.url,
+              target: '_blank',
+              rel: 'noopener noreferrer',
+              style: 'font-size: 0.85rem; color: var(--emerald); text-decoration: none; word-break: break-all; opacity: 0.85; transition: opacity 0.2s;',
+              onMouseEnter: (e: any) => { e.target.style.opacity = '1'; e.target.style.textDecoration = 'underline'; },
+              onMouseLeave: (e: any) => { e.target.style.opacity = '0.85'; e.target.style.textDecoration = 'none'; }
+            }, r.url)
+          )
+        )
+      )
+    )
+  );
+});
+
 // --- App Layout ---
 
 const Sidebar = component(() => {
   const NavItem = (id: string, label: string, iconHtml: string) => {
     const el = h('div', {
       class: () => `nav-item ${currentRoute.value === id ? 'active' : ''}`,
-      onClick: () => { currentRoute.value = id; }
+      onClick: () => { currentRoute.value = id; isMobileMenuOpen.value = false; }
     });
     el.innerHTML = iconHtml + `<span>${label}</span>`;
     return el;
   };
 
-  return h('aside', { class: 'sidebar' },
+  return h('aside', { class: () => `sidebar ${isMobileMenuOpen.value ? 'mobile-open' : ''}` },
     h('div', { class: 'brand', style: 'display: flex; align-items: center; gap: 0.75rem; padding: 0 0.5rem;' },
       h('div', { style: 'color: var(--emerald); display: flex; align-items: center; justify-content: center;' }, h('div', { innerHTML: Icons.Logo() })),
       h('h1', { style: 'margin: 0; font-size: 1.5rem; letter-spacing: -0.02em;' }, 'GreenAlpha')
@@ -770,7 +866,8 @@ const Sidebar = component(() => {
       NavItem('how', 'Methodology', Icons.HowItWorks()),
       NavItem('mechanisms', 'Mechanisms', Icons.Mechanisms()),
       NavItem('data', 'Data Insights', Icons.Data()),
-      NavItem('simulator', 'Simulator', Icons.Simulator())
+      NavItem('simulator', 'Simulator', Icons.Simulator()),
+      NavItem('references', 'References', Icons.References())
     )
   );
 });
@@ -800,6 +897,7 @@ const MainApp = component(() => {
           case 'mechanisms': return MechanismsComponent();
           case 'data': return DataPage();
           case 'simulator': return SimulatorPage();
+          case 'references': return ReferencesPage();
           default: return HomePage();
         }
       })();
@@ -807,7 +905,30 @@ const MainApp = component(() => {
     });
   });
 
+  // Dark overlay — tapping it closes the sidebar on mobile
+  const overlay = h('div', {
+    class: () => `mobile-overlay ${isMobileMenuOpen.value ? 'active' : ''}`,
+    onClick: () => { isMobileMenuOpen.value = false; }
+  });
+
+  // Fixed top bar visible only on mobile screens
+  const mobileHeader = h('header', { class: 'mobile-header' },
+    h('button', {
+      class: 'hamburger-btn',
+      onClick: () => { isMobileMenuOpen.value = !isMobileMenuOpen.value; },
+      'aria-label': 'Toggle navigation menu'
+    },
+      h('span', {}),
+      h('span', {}),
+      h('span', {})
+    ),
+    h('span', { class: 'mobile-header-title' }, 'GreenAlpha'),
+    h('div', { style: 'width: 34px;' }) // Spacer to keep title centred
+  );
+
   return h('div', { id: 'app-container', style: 'display: flex; width: 100%' },
+    overlay,
+    mobileHeader,
     Sidebar(),
     h('main', { class: 'main-content' }, container)
   );
