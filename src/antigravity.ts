@@ -72,7 +72,11 @@ export function h(
   props: Record<string, any> = {},
   ...children: (Node | string | (() => Node | string))[]
 ): Element {
-  const isSVG = ['svg', 'line', 'path', 'circle', 'text', 'rect', 'polyline', 'g', 'marker'].includes(tag);
+  const svgTags = [
+    'svg', 'line', 'path', 'circle', 'text', 'rect', 'polyline', 'g', 'marker', 
+    'defs', 'clipPath', 'polygon', 'ellipse', 'stop', 'linearGradient', 'radialGradient', 'mask'
+  ];
+  const isSVG = svgTags.includes(tag);
   const el = isSVG
     ? document.createElementNS('http://www.w3.org/2000/svg', tag) as SVGElement
     : document.createElement(tag);
